@@ -34,8 +34,6 @@ TARGET_CHANNELS = [
     1538886981692424253, 1538886884082589787
 ]
 
-IMAGE_URL = "https://cdn.discordapp.com/attachments/1539654724880433153/1540826636310814810/Gemini_Generated_Image_2wgatm2wgatm2wga.jfif"
-
 @bot.event
 async def on_ready():
     print(f"تم تشغيل البوت بنجاح: {bot.user.name}")
@@ -46,9 +44,8 @@ async def on_message(message):
         return
 
     if message.channel.id in TARGET_CHANNELS:
-        embed = discord.Embed()
-        embed.set_image(url=IMAGE_URL)
-        await message.channel.send(embed=embed)
+        if os.path.exists("line.png"):
+            await message.channel.send(file=discord.File("line.png"))
 
     await bot.process_commands(message)
 
