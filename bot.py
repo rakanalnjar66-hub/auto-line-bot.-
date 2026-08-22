@@ -5,7 +5,7 @@ from discord.ext import commands
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 
-# 1. خادم الويب لإبقاء البوت شغال في Render
+# 1. خادم الويب
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -26,34 +26,19 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# قائمة الرومات المحددة (18 روم)
 TARGET_CHANNELS = [
-    1540429474405818468,
-    1540429517506478090,
-    1540429563660599356,
-    1540429583902580826,
-    1540429188077453433,
-    1540429149284606092,
-    1540429233409630258,
-    1540429110680092772,
-    1540428845193101503,
-    1540428777362956308,
-    1540428366069629100,
-    1538886597158772847,
-    1538886660492755035,
-    1539450874785693716,
-    1538886761990594650,
-    1538886721272549446,
-    1538886981692424253,
-    1538886884082589787
+    1540429474405818468, 1540429517506478090, 1540429563660599356, 1540429583902580826,
+    1540429188077453433, 1540429149284606092, 1540429233409630258, 1540429110680092772,
+    1540428845193101503, 1540428777362956308, 1540428366069629100, 1538886597158772847,
+    1538886660492755035, 1539450874785693716, 1538886761990594650, 1538886721272549446,
+    1538886981692424253, 1538886884082589787
 ]
 
-# رابط صورة الخط الفاصل
-LINE_IMAGE_URL = "https://cdn.discordapp.com/attachments/1539654724880433153/1540826636310814810/Gemini_Generated_Image_2wgatm2wgatm2wga.jfif?ex=6a8b5e21&is=6a8a0ca1&hm=21d267730f0ba96cc418f1324643c31fdb33c399cb5a7fb2c22d48807e3ae638&"
+IMAGE_URL = "https://cdn.discordapp.com/attachments/1539654724880433153/1540826636310814810/Gemini_Generated_Image_2wgatm2wgatm2wga.jfif"
 
 @bot.event
 async def on_ready():
-    print(f"تم تشغيل بوت الخط الفاصل بنجاح باسم: {bot.user.name}")
+    print(f"تم تشغيل البوت بنجاح: {bot.user.name}")
 
 @bot.event
 async def on_message(message):
@@ -61,13 +46,12 @@ async def on_message(message):
         return
 
     if message.channel.id in TARGET_CHANNELS:
-        await message.channel.send(LINE_IMAGE_URL)
+        embed = discord.Embed()
+        embed.set_image(url=IMAGE_URL)
+        await message.channel.send(embed=embed)
 
     await bot.process_commands(message)
 
-# استدعاء التوكين بآمان من متغيرات البيئة
 token = os.environ.get("BOT_TOKEN")
 if token:
     bot.run(token)
-else:
-    print("خطأ: لم يتم العثور على BOT_TOKEN في Environment Variables!")
