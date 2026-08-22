@@ -65,6 +65,9 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-# التوكين
-BOT_TOKEN = "MTU0MDgyODcxNzAyMDg4MDkwNg.GAhKwx.2r4LVj7ZMzUKDVjy3mO1kj60hOE1NKuYVeKXd0"
-bot.run(BOT_TOKEN)
+# استدعاء التوكين بآمان من متغيرات البيئة
+token = os.environ.get("BOT_TOKEN")
+if token:
+    bot.run(token)
+else:
+    print("خطأ: لم يتم العثور على BOT_TOKEN في Environment Variables!")
