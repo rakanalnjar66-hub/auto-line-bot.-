@@ -50,5 +50,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 token = os.environ.get("BOT_TOKEN")
-if token:
-    bot.run(token)
+# تشغيل البوت بأمان
+import os
+
+bot.run(os.environ["DISCORD_TOKEN"])
