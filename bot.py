@@ -1,17 +1,16 @@
 import os
-import asyncio
 import discord
 from discord.ext import commands
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 
-# 1. خادم الويب (للحفاظ على استضافة Render ومنع نوم السيرفر عبر UptimeRobot)
+# 1. خادم الويب لمنع نوم السيرفر
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.send_header("Content-type", "text/plain")
         self.end_headers()
-        self.wfile.write(b"977 Voice Bots Keeper is Online!")
+        self.wfile.write(b"Auto-Line Bot is Alive!")
 
     def do_HEAD(self):
         self.send_response(200)
@@ -25,71 +24,40 @@ def run_server():
 
 Thread(target=run_server, daemon=True).start()
 
-# 2. قراءة التوكنات والرومات من متغيرات البيئة (Environment Variables)
-BOT_CONFIGS = []
+# 2. إعدادات بوت الخطوط
+intents = discord.Intents.default()
+intents.messages = True
+intents.message_content = True
 
-# يبحث عن المتغيرات BOT_TOKEN_1 إلى BOT_TOKEN_10 ومقابلها VOICE_CHANNEL_1 إلى VOICE_CHANNEL_10
-for i in range(1, 11):
-    token = os.environ.get(f"BOT_TOKEN_{i}")
-    channel_id = os.environ.get(f"VOICE_CHANNEL_{i}")
-    
-    if token and channel_id:
-        try:
-            BOT_CONFIGS.append({
-                "token": token.strip(),
-                "channel_id": int(channel_id.strip())
-            })
-        except ValueError:
-            print(f"[خطأ] ID الروم الصوتي رقم {i} غير صالح.")
+bot = commands.Bot(command_prefix="!", intents=intents)
 
-# 3. دالة تشغيل بوت واحد والربط بالروم الصوتي
-async def run_single_bot(config, bot_index):
-    token = config["token"]
-    channel_id = config["channel_id"]
-    
-    intents = discord.Intents.default()
-    intents.voice_states = True
-    bot = commands.Bot(command_prefix="!", intents=intents)
+# أيديات رومات الخطوط
+TARGET_CHANNELS = [
+    1540429474405818468, 1540429517506478090, 1540429563660599356, 1540429583902580826,
+    1540429188077453433, 1540429149284606092, 1540429233409630258, 1540429110680092772,
+    1540428845193101503, 1540428777362956308, 1540428366069629100, 1538886597158772847,
+    1538886660492755035, 1539450874785693716, 1538886761990594650, 1538886721272549446,
+    1538886981692424253, 1538886884082589787
+]
 
-    @bot.event
-    async def on_ready():
-        print(f"[{bot_index}] تم تسجيل الدخول: {bot.user}")
-        try:
-            channel = bot.get_channel(channel_id)
-            if channel and isinstance(channel, discord.VoiceChannel):
-                await channel.connect(reconnect=True, self_deaf=True)
-                print(f"[{bot_index}] دخل الروم ({channel.name}) بنجاح.")
-            else:
-                print(f"[{bot_index}] خطأ: لم يتم العثور على الروم الصوتي {channel_id}")
-        except Exception as e:
-            print(f"[{bot_index}] فشل التوصيل بالروم: {e}")
+@bot.event
+async def on_ready():
+    print(f"تم تشغيل بوت الخطوط بنجاح: {bot.user.name}")
 
-    @bot.event
-    async def on_voice_state_update(member, before, after):
-        # إعادة الاتصال تلقائياً عند الطرد أو انقطاع الاتصال
-        if member.id == bot.user.id and after.channel is None:
-            await asyncio.sleep(5)
-            try:
-                channel = bot.get_channel(channel_id)
-                if channel:
-                    await channel.connect(reconnect=True, self_deaf=True)
-                    print(f"[{bot_index}] تمت إعادة الاتصال بالروم تلقائياً.")
-            except Exception as e:
-                print(f"[{bot_index}] فشل إعادة الاتصال تلقائياً: {e}")
-
-    try:
-        await bot.start(token)
-    except Exception as e:
-        print(f"[{bot_index}] خطأ في التوكن: {e}")
-
-# 4. تشغيل جميع البوتات المكتشفة معاً
-async def main():
-    if not BOT_CONFIGS:
-        print("[تحذير] لم يتم العثور على أي توكنات في Environment Variables! يرجى إضافتها في Render.")
+@bot.event
+async def on_message(message):
+    if message.author.bot:
         return
 
-    tasks = [run_single_bot(cfg, idx) for idx, cfg in enumerate(BOT_CONFIGS, start=1)]
-    await asyncio.gather(*tasks)
+    if message.channel.id in TARGET_CHANNELS:
+        if os.path.exists("line.png"):
+            await message.channel.send(file=discord.File("line.png"))
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    await bot.process_commands(message)
+
+# قراءة توكن بوت الخطوط المفرد
+token = os.environ.get("BOT_TOKEN") or os.environ.get("DISCORD_TOKEN")
+if token:
+    bot.run(token)
+else:
+    print("[خطأ] لم يتم العثور على BOT_TOKEN في Environment Variables!")
