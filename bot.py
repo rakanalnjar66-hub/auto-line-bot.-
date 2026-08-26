@@ -5,12 +5,18 @@ from discord.ext import commands
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
 
-# 1. خادم الويب لإبقاء البوت شغال على Render
+# 1. خادم الويب (يدعم GET و HEAD لإرضاء UptimeRobot)
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
+        self.send_header("Content-type", "text/plain")
         self.end_headers()
         self.wfile.write(b"977 Auto-Line Bot is Alive!")
+
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
 
 def run_server():
     port = int(os.environ.get("PORT", 8080))
